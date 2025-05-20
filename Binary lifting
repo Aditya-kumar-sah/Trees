@@ -1,0 +1,24 @@
+// finding kth parent using binary lifting (1based indexing)
+// 0 indicates no kth parent of that node
+//so we used 1 based indexing to differentiate between 0(no parent) and 1(node)
+ll m = 20;
+
+void dfs(ll node,ll par,vector<vector<ll>>& Par,vector<vector<ll>>& adj){
+    Par[node][0] = par;
+    for(ll i=1;i<m;i++){
+        Par[node][i] = Par[Par[node][i-1]][i-1];
+    }
+
+    for(auto it : adj[node]){
+        dfs(it,node,Par,adj);
+    }
+}
+
+ll kthPar(ll u,ll k,vector<vector<ll>>& Par){
+    for(ll i=0;i<m;i++){
+        if((1ll<<i)&k) u = Par[u][i];
+    }
+
+    if(u == 0) return -1;
+    return u;
+}
