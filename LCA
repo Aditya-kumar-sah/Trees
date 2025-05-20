@@ -1,0 +1,36 @@
+//LCA of nodes u,v using binary lifting --->logn
+ll m = 20;
+
+void dfs(ll node,ll par,vector<vector<ll>>& Par,vector<vector<ll>>& adj,vector<ll>& dpth){
+
+    Par[node][0] = par;
+    dpth[node] = 1+dpth[par];
+
+    for(ll i=1;i<m;i++){
+        Par[node][i] = Par[Par[node][i-1]][i-1];
+    }
+
+    for(auto it : adj[node]){
+        dfs(it,node,Par,adj,dpth);
+    }
+}
+
+ll lca(ll &u,ll &v,vector<ll>& dpth,vector<vector<ll>>& Par){
+    if(u == v) return u;
+    if(dpth[u]<dpth[v]) swap(u,v);
+
+    ll diff = dpth[u]-dpth[v];
+
+    for(ll i=m-1;i>=0;i--){
+        if((1ll<<i)&diff) u = Par[u][i];
+    }
+
+    for(ll i=m-1;i>=0;i--){
+         if(Par[u][i] != Par[v][i]){
+            u = Par[u][i];
+            v = Par[v][i];
+         }
+    }
+
+    return (u==v) ? u : Par[u][0];
+}
