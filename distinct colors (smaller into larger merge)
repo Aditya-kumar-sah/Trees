@@ -1,0 +1,92 @@
+https://cses.fi/problemset/task/1139/
+#include <bits/stdc++.h>
+
+#define ll long long
+#define mr make_pair
+
+using namespace std;
+
+ll max(ll a, ll b){
+    if(a>b) return a;
+    return b;
+}
+
+ll min(ll a, ll b){
+    if(a<b) return a;
+    return b;
+}
+
+int max(int a,int b){
+    if(a>b) return a;
+    return b;
+}
+
+int min(int a,int b){
+    if(a<b) return a;
+    return b;
+}
+
+void f(vector<ll> &v,ll &n){
+   for(ll i = 0;i<n;i++){
+       cin>>v[i];
+   }
+}
+
+void sort(vector<ll>& v){
+    sort(v.begin(),v.end());
+}
+
+void sort(vector<int>& v){
+    sort(v.begin(),v.end());
+}
+
+
+void dfs2(ll node,ll par,vector<set<ll>>& s,vector<vector<ll>>& adj,vector<ll>& ans,vector<ll>& a){
+
+    s[node].insert(a[node-1]);
+      
+    for(auto it : adj[node]){
+        if(it != par){
+            dfs2(it,node,s,adj,ans,a);
+            if(s[node].size()<s[it].size()){
+                swap(s[node],s[it]);
+            }
+            for(auto i : s[it]){
+                s[node].insert(i);
+            }
+        }
+    }
+
+    ans[node] = s[node].size();
+}
+
+int main(){
+    
+        ll n;
+        cin>>n;
+
+        vector<ll> a(n);
+        f(a,n);
+
+        vector<vector<ll>> adj(n+1);
+
+        for(ll i=0;i<n-1;i++){
+            ll x,y;
+            cin>>x>>y;
+
+            adj[x].push_back(y);
+            adj[y].push_back(x);
+        }
+
+        vector<set<ll>> s(n+1);
+        vector<ll> ans(n+1);
+       
+        dfs2(1,1,s,adj,ans,a);
+
+        
+
+        for(ll i=1;i<=n;i++){
+            cout<<ans[i]<<" ";
+        }
+        cout<<endl;
+}
