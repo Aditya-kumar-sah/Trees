@@ -1,0 +1,106 @@
+https://codeforces.com/contest/1882/problem/D
+#include <bits/stdc++.h>
+
+#define ll long long
+#define mr make_pair
+
+using namespace std;
+
+ll max(ll a, ll b){
+    if(a>b) return a;
+    return b;
+}
+
+ll min(ll a, ll b){
+    if(a<b) return a;
+    return b;
+}
+
+int max(int a,int b){
+    if(a>b) return a;
+    return b;
+}
+
+int min(int a,int b){
+    if(a<b) return a;
+    return b;
+}
+
+void f(vector<ll> &v,ll &n){
+   for(ll i = 0;i<n;i++){
+       cin>>v[i];
+   }
+}
+
+void sort(vector<ll>& v){
+    sort(v.begin(),v.end());
+}
+
+void sort(vector<int>& v){
+    sort(v.begin(),v.end());
+}
+
+ll dfs(ll node,ll par,vector<ll>& sub,vector<vector<ll>>& adj,vector<ll>& a){
+
+    ll cost = 0;
+      
+    for(auto it : adj[node]){
+        if(it != par){
+            cost += dfs(it,node,sub,adj,a);
+            sub[node] += sub[it];
+            cost += ((a[node-1]^a[it-1])*sub[it]);
+        }
+    }
+
+    return cost;
+}
+void dfs2(ll node,ll par,vector<ll>& sub,vector<vector<ll>>& adj,vector<ll>& ans,ll value,vector<ll>& a,ll &n){
+
+    ans[node] = value;
+      
+    for(auto it : adj[node]){
+        if(it != par){
+            ll var = value+(a[node-1]^a[it-1])*(n-2*sub[it]);
+            dfs2(it,node,sub,adj,ans,var,a,n);
+        }
+    }
+
+}
+
+int main(){
+    ll t;
+    cin>>t;
+
+    while(t--){
+        ll n;
+        cin>>n;
+
+        vector<ll> a(n);
+        f(a,n);
+
+        vector<vector<ll>> adj(n+1);
+
+        for(ll i=0;i<n-1;i++){
+            ll x,y;
+            cin>>x>>y;
+
+            adj[x].push_back(y);
+            adj[y].push_back(x);
+        }
+
+        vector<ll> sub(n+1,1);
+
+        ll cost = dfs(1,1,sub,adj,a);
+
+        vector<ll> ans(n+1);
+        dfs2(1,1,sub,adj,ans,cost,a,n);
+
+        for(ll i=1;i<=n;i++){
+            cout<<ans[i]<<" ";
+        }
+        cout<<endl;
+
+
+    }
+
+}
