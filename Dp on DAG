@@ -1,0 +1,97 @@
+https://leetcode.com/problems/maximum-profit-from-trading-stocks-with-discounts/
+same problem--- sum we can made from 0-S from array if tot sum of array is S
+#define ll long long
+class Solution {
+public:
+    vector<int> pre;
+    vector<int> fut;
+    vector<vector<ll>> adj;
+
+    //if we have budget from 0 to b then we can calculate max profit 
+    //at each budget from 0 to b by taking different combinations of budget
+    // from children subtree,starting with {0,-inf,-inf...,-inf} where index is from 0 to b
+    //then updating this array by considering each child budget array and then storing max profit
+    //for eg:taking ind1 = i from this array and ind2 = j from any chind array
+    //then stoing next[ind1+ind2] = max(next[ind1+ind2],child[ind2]+orig[ind1]);
+    //next[ind1+ind2] stores max profit by taking budget as ind1+ind2
+    
+    void dfs(ll node,vector<vector<vector<ll>>> &dp,ll bud){
+        
+        vector<pair<vector<ll>,vector<ll>>> childps;
+        for(auto it : adj[node]){
+            dfs(it,dp,bud);
+            childps.push_back({dp[it][0],dp[it][1]});
+        }
+
+        vector<ll> last(bud+1,0);
+
+        for(ll p=0;p<=1;p++){
+            vector<ll>  base(bud+1,0);
+            vector<ll> next(bud+1,0);
+
+            base[0] = 0;
+
+            for(auto it: childps){
+                for(ll b1=0;b1<=bud;b1++){
+                  for(ll b2=0;b1+b2<=bud;b2++){
+                      if(base[b1] == 0 && b1!=0) continue;
+                      next[b1+b2] = max(next[b1+b2],base[b1]+it.first[b2]);
+                  }
+                }
+                base = next;
+            }
+
+            for(ll i=0;i<=bud;i++){
+                last[i] = max(last[i],base[i]);
+            }
+
+            ll price = pre[node];
+            if(p==1) price = price/2;
+
+            ll profit = fut[node]-price;
+
+            vector<ll>  base1(bud+1,0);
+            vector<ll> next1(bud+1,0);
+
+            base1[0] = 0;
+
+            for(auto it: childps){
+                for(ll b1=0;b1<=bud;b1++){
+                  for(ll b2=0;b1+b2<=bud;b2++){
+                      if(base1[b1] == 0 && b1!=0) continue;
+                      next1[b1+b2] = max(next1[b1+b2],base1[b1]+it.second[b2]);
+                  }
+                }
+                base1 = next1;
+            }
+
+            for(ll i=price;i<=bud;i++){
+                last[i] = max(last[i],base1[i-price]+profit);
+            }
+
+            dp[node][p] = last;
+        }
+    }
+    int maxProfit(int n, vector<int>& present, vector<int>& future, vector<vector<int>>& hierarchy, int budget) {
+        adj.resize(n);
+
+        for(ll i=0;i<hierarchy.size();i++){
+            ll u = hierarchy[i][0];
+            ll v = hierarchy[i][1];
+
+            adj[u-1].push_back(v-1);
+        }
+
+        pre = present;
+        fut = future;
+
+
+        vector<vector<vector<ll>>> dp(n,vector<vector<ll>>(2,vector<ll>(budget+1)));
+
+        dfs(0,dp,budget);
+
+         ll ans = 0;
+
+         return dp[0][0][budget];
+    }
+};
