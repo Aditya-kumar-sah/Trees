@@ -1,0 +1,96 @@
+https://leetcode.com/problems/number-of-ways-to-assign-edge-weights-ii/
+
+#define ll long long
+class Solution {
+public:
+    ll m;
+    void dfs(ll node,ll par,vector<vector<pair<ll,ll>>>& Par,vector<vector<ll>>& adj,vector<ll>& dpth){    
+        Par[node][0].first = par;
+        Par[node][0].second = 1; 
+        dpth[node] = 1+dpth[par];
+
+        for(ll i=1;i<m;i++){
+            auto p = Par[node][i-1];
+            Par[node][i] = {Par[p.first][i-1].first,Par[p.first][i-1].second+(1ll<<(i-1))};
+        }
+
+        for(auto it : adj[node]){
+            if(it != par) dfs(it,node,Par,adj,dpth);
+        }
+    }
+
+    ll dist(ll &u,ll &v,vector<ll>& dpth,vector<vector<pair<ll,ll>>>& Par){
+        if(u == v) return 0;
+        if(dpth[u]<dpth[v]) swap(u,v);
+
+        ll diff = dpth[u]-dpth[v];
+
+        ll ans = 0;
+
+        for(ll i=m-1;i>=0;i--){
+            if((1ll<<i)&diff){
+                 ans += Par[u][i].second;
+                 u = Par[u][i].first;
+            }
+        }
+
+        for(ll i=m-1;i>=0;i--){
+             if(Par[u][i] != Par[v][i]){
+                ans += Par[u][i].second;
+                ans += Par[v][i].second;
+                u = Par[u][i].first;
+                v = Par[v][i].first;
+             }
+        }
+
+        if(u == v) return ans;
+        return ans+2;
+    }
+    ll pw(ll a,ll b,ll modu){
+        if(b==0) return 1;
+
+        if(b%2 == 0){
+            ll t = pw(a,b/2,modu);
+
+            return (t*t)%modu;
+        }
+        else{
+            ll t = pw(a,b-1,modu);
+
+            return (t*a)%modu;
+        }
+    }
+    vector<int> assignEdgeWeights(vector<vector<int>>& edges, vector<vector<int>>& queries) {
+        ll n = edges.size()+1;
+        m = 20;
+        vector<ll> dpth(n+1,1);
+        vector<vector<pair<ll,ll>>> Par(n+1,vector<pair<ll,ll>>(21,{0,0}));
+        vector<vector<ll>> adj(n+1);
+
+        for(ll i=0;i<n-1;i++){
+            ll u = edges[i][0];
+            ll v = edges[i][1];
+
+            adj[u].push_back(v);
+            adj[v].push_back(u);
+        }
+
+        dfs(1,0,Par,adj,dpth);
+
+        vector<int> ans(queries.size());
+
+        ll modu = 1e9+7;
+
+        for(ll i=0;i<queries.size();i++){
+            ll u = queries[i][0];
+            ll v = queries[i][1];
+            ll dis = dist(u,v,dpth,Par);
+            // cout<<dis<<" ";
+            if(dis == 0) ans[i] = 0;
+            else if(dis == 1) ans[i] = 1;
+            else ans[i] = pw(2,dis-1,modu);
+        }
+
+        return ans;
+    }
+};
